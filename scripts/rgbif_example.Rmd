@@ -16,7 +16,7 @@ options(repos = c(CRAN = "https://cloud.r-project.org/"))
 ```{r, eval = FALSE}
 
 #Install all packages at once
-install.packages(c("rgbif",#For download records
+install.packages(c("rgbif",#For downloading records
                    "ggplot2",#For mapping records
                    "sf",# For spatial data
                    "rnaturalearth",#world map
@@ -40,7 +40,10 @@ library(dplyr)
 ```{r}
 # Search records in GBIF
 species_name <- "Laelia superbiens"
-occ.laelia <- occ_search(scientificName = species_name, limit = 5000, basisOfRecord = "PRESERVED_SPECIMEN", fields = "all")#fields = all: contains 147 variables. If you handle a large amount of data, you should check what data should be needed.
+occ.laelia <- occ_search(scientificName = species_name,
+                         limit = 5000, 
+                         basisOfRecord = "PRESERVED_SPECIMEN", 
+                         fields = "all")#fields = all: contains 147 variables. If you handle a large amount of data, you should check what data should be needed.
 #108 record for Laelia superbiens
 #In addition, use ‘??occ_search’ to see all the arguments to the function
 
