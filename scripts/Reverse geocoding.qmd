@@ -1,0 +1,52 @@
+---
+title: "Reverse geocoding"
+author: "GML"
+format: html
+editor: visual
+---
+
+## Reseverse Geocoding
+
+We use geographical coordinates to obtain information on the distributions of KBAs according to administrative organization (localities, provinces, departments).
+
+```{r}
+
+
+install.packages('tidygeocoder')
+install.packages("tidyverse")
+library(dplyr, warn.conflicts = FALSE)
+library(tidygeocoder)
+library(tidyverse)
+
+```
+
+Reading a file from (KBA webpage)\[https://www.keybiodiversityareas.org/sites-table\]
+
+```{r}
+
+data_KBAs_Peru <- read.csv("data/Sites table - keybiodiversityareas.org.csv",
+                           header=TRUE, 
+                           sep = ",")
+
+head(data_KBAs_Peru)
+poi <- data_KBAs_Peru[,c(9,10)]
+```
+
+We want to get geographical details of provinces/regions to quantify the numbers of KBAs in Cajamarca and Amazonas, which are the areas of interest and where the collections of KUELAP mainly come from.
+
+```{r}
+
+# Where are the KBAs
+locs_KBAs <- tidygeocoder::reverse_geo(long = poi[, "Longitude"], 
+                          lat = poi[, "Latitude"], 
+                          method = "osm")
+
+# How many in Amazonas
+
+locs_KBAs[grepl("Amazonas", locs_KBAs$address),]#14
+locs_KBAs[grepl("Cajamarca", locs_KBAs$address),]#22
+
+
+```
+
+These were 234 coordinates (KBAs) and the result was relatively quick, the question is whether this works with large amounts of data.

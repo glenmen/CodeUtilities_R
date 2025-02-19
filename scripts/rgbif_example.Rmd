@@ -1,0 +1,80 @@
+---
+title: "Download records with Rgbif"
+author: "Derio Antonio Jiménez-López"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+options(repos = c(CRAN = "https://cloud.r-project.org/"))
+```
+
+## Install Packages
+```{r, eval = FALSE}
+
+#Install all packages at once
+install.packages(c("rgbif",#For download records
+                   "ggplot2",#For mapping records
+                   "sf",# For spatial data
+                   "rnaturalearth",#world map
+                   "rnaturalearthdata",#world map data
+                   "dplyr"))#For data management
+#pd: eval = FALSE: This is so that it does not install the packages. ‘that the script lines in this part are not executed’.
+```
+
+# Load packages
+```{r}
+library(rgbif)
+library(ggplot2)
+library(sf)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(dplyr)
+```
+
+## Download records for the epiphytic orchid "Laelia superbiens"
+
+```{r}
+# Search records in GBIF
+species_name <- "Laelia superbiens"
+occ.laelia <- occ_search(scientificName = species_name, limit = 5000, basisOfRecord = "PRESERVED_SPECIMEN", fields = "all")#fields = all: contains 147 variables. If you handle a large amount of data, you should check what data should be needed.
+#108 record for Laelia superbiens
+#In addition, use ‘??occ_search’ to see all the arguments to the function
+
+# Convert to data.frame
+occ.laelia <- occ.laelia$data
+head(occ.laelia, 10)
+```
+
+## Data Filtering
+
+```{r}
+# Filter records with coordinates and preserved specimens
+laelia_filtered <- subset(occ.laelia, 
+                        !is.na(decimalLatitude) & !is.na(decimalLongitude))
+```
+
+## Spatial visualization
+
+```{r}
+# Convert to sf object
+laelia_sf<- st_as_sf(laelia_filtered, coords = c("decimalLongitude", "decimalLatitude"),crs = 4326)#geographic coordinate system WGS84 
+
+# world shapefile
+world <- st_transform(ne_countries(scale = "medium", returnclass = "sf"), crs = 4326)
+
+# Filter only Central American countries
+centroamerica <- world %>%
+  filter(name %in% c("Mexico","Belize", "Costa Rica", "El Salvador", "Guatemala", "Honduras", "Nicaragua", "Panama"))
+centroamerica <- st_transform(centroamerica, crs = 4326)#Project
+
+# Plot records
+ggplot() +
+  geom_sf(data = centroamerica, fill = "gray70", color = "gray70") +
+  geom_sf(data = laelia_sf, aes(color = "Records"), size = 2, alpha = 0.7) +
+  labs(title = "", x = "Longitude", y = "Latitude") +
+  theme_light()
+```
