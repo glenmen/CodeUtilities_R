@@ -49,3 +49,9 @@ locs_KBAs[grepl("Cajamarca", locs_KBAs$address),]#22
 ```
 
 These were 234 coordinates (KBAs) and the result was relatively quick, the question is whether this works with large amounts of data.
+
+
+```{r}
+# change 1
+```
+
