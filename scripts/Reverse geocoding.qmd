@@ -11,9 +11,8 @@ We use geographical coordinates to obtain information on the distributions of KB
 
 ```{r}
 
-
-install.packages('tidygeocoder')
-install.packages("tidyverse")
+#install.packages('tidygeocoder')
+#install.packages("tidyverse")
 library(dplyr, warn.conflicts = FALSE)
 library(tidygeocoder)
 library(tidyverse)
