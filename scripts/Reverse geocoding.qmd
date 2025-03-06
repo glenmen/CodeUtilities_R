@@ -5,15 +5,15 @@ format: html
 editor: visual
 ---
 
-## Reseverse Geocoding
+## Reverse Geo coding
 
 We use geographical coordinates to obtain information on the distributions of KBAs according to administrative organization (localities, provinces, departments).
 
 ```{r}
 
 
-install.packages('tidygeocoder')
-install.packages("tidyverse")
+#install.packages('tidygeocoder')
+#install.packages("tidyverse")
 library(dplyr, warn.conflicts = FALSE)
 library(tidygeocoder)
 library(tidyverse)
@@ -24,7 +24,7 @@ Reading a file from (KBA webpage)\[https://www.keybiodiversityareas.org/sites-ta
 
 ```{r}
 
-data_KBAs_Peru <- read.csv("data/Sites table - keybiodiversityareas.org.csv",
+data_KBAs_Peru <- read.csv("../data/Sites table - keybiodiversityareas.org.csv",
                            header=TRUE, 
                            sep = ",")
 
