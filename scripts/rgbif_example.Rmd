@@ -81,19 +81,3 @@ ggplot() +
   labs(title = "", x = "Longitude", y = "Latitude") +
   theme_light()
 ```
-
-Describir los cambios que se hacen:
-
-```{r}
-
-#gbif_peru <-
-```
-
-
-
-
-
-
-
-
-
