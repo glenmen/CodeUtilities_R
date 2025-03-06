@@ -1,0 +1,203 @@
+---
+title: "Busqueda Registros Flora en GBIF"
+author: "Robert Arteaga"
+format: 
+  html:
+    theme:
+      dark: darkly
+editor: visual
+---
+
+# Informacion Inicial
+
+Documentacion referencial de uso de informacion de gbif y `rgbif`
+
+<https://techdocs.gbif.org/en/data-use/>
+
+<https://techdocs.gbif.org/en/openapi/>\
+
+# Paquetes
+
+```{r}
+#| echo: false
+library(tidyverse)  # manipulacion (incluye dlyr y ggplot2)
+library(rgbif)      # busqueda registros
+library(sf)         # manejo informacion geografica y espacial
+library(rnaturalearth)
+library(rnaturalearthdata)
+```
+
+# 1) Definir poligono de referencia para busqueda
+
+se debe definir un poligono de referencia para la busqueda. Se propone el siguiente a modo de prueba.
+
+Adicionalmente, se crea un KML para visualizar en google earth.
+
+```{r}
+polygon_wkt <- 
+  "POLYGON((-78.75 -3.95, -78.80 -4.50, -78.90 -5.00, 
+            -79.00 -5.50, -79.10 -6.00, -79.20 -6.50, 
+            -79.10 -7.00, 
+            -78.80 -7.50, -78.50 -8.00, -78.20 -7.90, 
+            -77.80 -7.50, -77.50 -7.00, -77.20 -6.50, 
+            -77.40 -6.00, -77.80 -5.50, -78.00 -5.00, 
+            -78.40 -4.40, -78.75 -3.95))"
+
+# crear objeto sf
+polygon_sf <- st_as_sfc(polygon_wkt, crs = 4326)
+
+# grabar como KML
+#st_write(polygon_sf, "amazonas_cajamarca.kml", driver = "KML", append = FALSE)
+
+```
+
+# 2) Busqueda Informacion
+
+La estrategia usada comprende bscar registros de plantas de grupos Liliopsida y Magnoliopsida. el proceso toma aproximadamente 2 horas en ser completado. Poligonos mas grandes y complejos pueden tomar más tiempo en ser desarrollados.
+
+## 2.1) Liliopsida
+
+13239 registros de liliopsida
+
+Retirar las marcas de comentarios para realizar la busqueda (aprox 0.5 horas)
+
+```{r}
+#| echo: false
+# start_time <- Sys.time() 
+ #liliopsida_records <- occ_data(
+  # taxonKey = 196,      # TaxonKey para Liliopsida (Monocots)
+   #geometry = polygon_wkt,  
+   #limit = 99999       # ajustar el limte de obtencion de registros
+#)
+# end_time <- Sys.time() 
+
+#diff_lilio_time <- difftime(end_time, start_time, units = "mins")
+
+#print(paste("Tiempo de Busqueda Liliopsida:", diff_lilio_time, "minutos", sep=" ")) #tiempo de busqueda de liliopsida
+
+#saveRDS(liliopsida_records, "03_output/liliopsida_records.rds")
+
+```
+
+Posterior al proceso de busqueda de liliopsida
+
+```{r}
+liliopsida_records <- readRDS("../repositorio_git02/rag_adiciones/liliopsida_records.rds")
+
+liliopsida_records02 <- liliopsida_records
+```
+
+## 2.2) Magnoliopsida
+
+81003 registros de magnoliopsida
+
+Retirar las marcas de comentarios para realizar la busqueda (aprox 1.8 horas)
+
+```{r}
+#| echo: false
+# start_time <- Sys.time() 
+#time01 <- Sys.time()
+#magnoliopsida_records <- occ_data(
+ # taxonKey = 220,      # TaxonKey para Magnoliopsida (eudicots)
+#  geometry = polygon_wkt,  
+ # limit = 99999       # Adjust the limit for more records
+#)
+
+# end_time <- Sys.time() 
+
+#diff_magno_time <- difftime(end_time, start_time, units = "mins")
+
+#print(paste("Tiempo de Busqueda Magnoliopsida:", diff_magno_time, "minutos", sep=" ")) #tiempo de busqueda de liliopsida
+
+#saveRDS(magnoliopsida_records, "03_output/magnoliopsida_records.rds")
+
+
+```
+
+posterior a la busqueda
+
+```{r}
+magnoliopsida_records <- readRDS("../repositorio_git02/rag_adiciones/magnoliopsida_records.rds")
+
+magnoliopsida_records02 <- magnoliopsida_records
+```
+
+# 3) Limpieza de registros
+
+se debe de realizar el procedimiento de limpieza por separado para cada taxon.
+
+hay diferencias en el numero de columnas consideradas
+
+## 3.1) Liliopsida
+
+```{r}
+liliopsida_records03 <- 
+  liliopsida_records02$data %>% 
+  filter(taxonRank=="SPECIES") %>% 
+  filter(basisOfRecord=="PRESERVED_SPECIMEN") %>% 
+  filter(!is.na(decimalLatitude)) %>% 
+  filter(!is.na(decimalLongitude))
+
+```
+
+## 3.2) Magnoliopsida
+
+```{r}
+magnoliopsida_records03 <- 
+  magnoliopsida_records02$data %>% 
+  filter(taxonRank=="SPECIES") %>% 
+  filter(basisOfRecord=="PRESERVED_SPECIMEN") %>% 
+  filter(!is.na(decimalLatitude)) %>% 
+  filter(!is.na(decimalLongitude))
+```
+
+# 4) Mapa de distribuciones
+
+## 4.0) Mapa de Perú y Ecuador
+
+```{r}
+# world shapefile
+world <- st_transform(ne_countries(scale = "medium", returnclass = "sf"), crs = 4326)
+
+# Filter only Central American countries
+sur_america01 <- world %>%
+  filter(name %in% c("Peru","Ecuador"))
+
+sur_america02 <- st_transform(sur_america01, crs = 4326)#Project
+
+```
+
+## 4.1) Mapa de Liliopsidas
+
+Mapa de distribucuion espacial de Liliopsida para Cajamarca y Amazonas (basado en `polygon_wkt)`
+
+```{r}
+
+# Convertir informacion a formato espacial (sf)
+lilio_sf <- st_as_sf(liliopsida_records03, coords = c("decimalLongitude", "decimalLatitude"), crs = 4326)
+
+# Plot records
+ggplot() +
+  geom_sf(data = sur_america02, fill = "gray70", color = "gray70") +
+  geom_sf(data = lilio_sf, aes(color = "Records"), size = 0.02, alpha = 0.7) +
+  labs(title = "", x = "Longitude", y = "Latitude") +
+  theme_light()
+
+```
+
+## 4.2) Mapa de Magnoliopsida
+
+grafico de magnoliopsida
+
+```{r}
+
+magno_sf <- st_as_sf(magnoliopsida_records03, coords = c("decimalLongitude", "decimalLatitude"), crs = 4326)
+
+# Plot records
+ggplot() +
+  geom_sf(data = sur_america02, fill = "gray70", color = "gray70") +
+  geom_sf(data = magno_sf, aes(color = "Records"), size = 0.02, alpha = 0.7) +
+  labs(title = "", x = "Longitude", y = "Latitude") +
+  theme_light()
+
+```
