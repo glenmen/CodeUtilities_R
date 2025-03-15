@@ -7,14 +7,10 @@ editor: visual
 
 ## Reverse Geo coding
 
-We use geographical coordinates to obtain information on the distributions of KBAs according to administrative organization (localities, provinces, departments).
+We use geographical coordinates to obtain information on the distributions of KBAs according to **administrative** organization (localities, provinces, departments).
 
 ```{r}
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 2e88163d4eaa29987c9fe9bd70c691a9427c837c
 #install.packages('tidygeocoder')
 #install.packages("tidyverse")
 library(dplyr, warn.conflicts = FALSE)
@@ -54,8 +50,6 @@ locs_KBAs[grepl("Cajamarca", locs_KBAs$address),]#22
 
 These were 234 coordinates (KBAs) and the result was relatively quick, the question is whether this works with large amounts of data.
 
-
 ```{r}
 # change 1
 ```
-

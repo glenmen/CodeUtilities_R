@@ -18,18 +18,35 @@ Documentacion referencial de uso de informacion de gbif y `rgbif`
 
 # Paquetes
 
+Si se usa por pri
+
 ```{r}
 #| echo: false
-library(tidyverse)  # manipulacion (incluye dlyr y ggplot2)
-library(rgbif)      # busqueda registros
-library(sf)         # manejo informacion geografica y espacial
-library(rnaturalearth)
-library(rnaturalearthdata)
+#library(tidyverse)  # manipulacion (incluye dlyr y ggplot2)
+#library(rgbif)      # busqueda registros
+#library(sf)         # manejo informacion geografica y espacial
+#library(rnaturalearth)
+#library(rnaturalearthdata)
+
+
+# Packages names as a character vector
+packages <- c("tidyverse", "rgbif", "sf",
+          "rnaturalearth", "rnaturalearthdata")# vectors con los nombres de los paquetes
+
+# Install packages not yet installed [for the first time]
+installed_packages <- packages %in% rownames(installed.packages())
+if (any(installed_packages == FALSE)) {
+ install.packages(packages[!installed_packages])
+}# En caso reconozca paquetes que no están instalados, este pedazo de código los instala, comentar (con #) después de la primera vez
+
+# Packages loading
+invisible(lapply(packages, require, character.only = TRUE)) # remove "invisible" to see whether the packages are loaded/available. 
+
 ```
 
 # 1) Definir poligono de referencia para busqueda
 
-se debe definir un poligono de referencia para la busqueda. Se propone el siguiente a modo de prueba.
+Se debe definir un poligono de referencia para la búsqueda. Se propone el siguiente a modo de prueba.
 
 Adicionalmente, se crea un KML para visualizar en google earth.
 
@@ -51,15 +68,15 @@ polygon_sf <- st_as_sfc(polygon_wkt, crs = 4326)
 
 ```
 
-# 2) Busqueda Informacion
+# 2) Busqueda de Información
 
-La estrategia usada comprende bscar registros de plantas de grupos Liliopsida y Magnoliopsida. el proceso toma aproximadamente 2 horas en ser completado. Poligonos mas grandes y complejos pueden tomar más tiempo en ser desarrollados.
+La estrategia usada comprende bscar registros de plantas de grupos Liliopsida y Magnoliopsida. El proceso toma aproximadamente 2 horas en ser completado (pero puede variar de acuerdo a la rapidez y características de la computadora). Polígonos más grandes y complejos pueden tomar más tiempo en ser desarrollados.
 
 ## 2.1) Liliopsida
 
 13239 registros de liliopsida
 
-Retirar las marcas de comentarios para realizar la busqueda (aprox 0.5 horas)
+Retirar las marcas de comentarios para realizar la busqueda (aprox 0.5 horas). [@robert Incluir la fecha de la búsqueda, esto es importante porque los repositorios cambian y esto se tiene que añadir en la metodología.]
 
 ```{r}
 #| echo: false
@@ -79,10 +96,10 @@ Retirar las marcas de comentarios para realizar la busqueda (aprox 0.5 horas)
 
 ```
 
-Posterior al proceso de busqueda de liliopsida
+Posterior al proceso de busqueda de liliopsida se graban en un archivo rds que reduce el tamaño.
 
 ```{r}
-liliopsida_records <- readRDS("../repositorio_git02/rag_adiciones/liliopsida_records.rds")
+liliopsida_records <- readRDS("./output/gbif_data/liliopsida_records.rds")# usar "../ [dos puntos, para imprimir/"rendering"]
 
 liliopsida_records02 <- liliopsida_records
 ```
@@ -114,19 +131,21 @@ Retirar las marcas de comentarios para realizar la busqueda (aprox 1.8 horas)
 
 ```
 
-posterior a la busqueda
+Posterior a la búsqueda se graba el objeto.
 
 ```{r}
-magnoliopsida_records <- readRDS("../repositorio_git02/rag_adiciones/magnoliopsida_records.rds")
+magnoliopsida_records <- readRDS("./output/gbif_data/magnoliopsida_records.rds")
 
 magnoliopsida_records02 <- magnoliopsida_records
 ```
 
-# 3) Limpieza de registros
+# 3) Filtrado de registros
 
-se debe de realizar el procedimiento de limpieza por separado para cada taxon.
+Se debe de filtrar por separado para cada taxon. Hay diferencias en el numero de columnas consideradas. Aquí se filtra la información que se va a usar. Los criterios mínimos son:
 
-hay diferencias en el numero de columnas consideradas
+-   Uso de especies como unidad mínima (evitar variedades, sub spp., etc).
+
+-   La base del registro deben ser especímenes de herbario unicamente.
 
 ## 3.1) Liliopsida
 
@@ -149,6 +168,26 @@ magnoliopsida_records03 <-
   filter(basisOfRecord=="PRESERVED_SPECIMEN") %>% 
   filter(!is.na(decimalLatitude)) %>% 
   filter(!is.na(decimalLongitude))
+```
+
+# 3) Limpieza de registros
+
+## 3.1) Limpieza de errores en registros
+
+Hay varios paquetes para esto, ver las opciones mas amigables en cuanto a código (gator, coordinatecleaner, etc.)
+
+```{r}
+
+
+
+```
+
+## 3.1) Ajuste taxonómico
+
+El "taxonomic scrubig" se puede hacer con los paquetes WFO y LCVP, y comparar el resultado.
+
+```{r}
+
 ```
 
 # 4) Mapa de distribuciones
