@@ -148,7 +148,6 @@ magnoliopsida_records <- readRDS("./output/gbif_data/magnoliopsida_records.rds")
 magnoliopsida_records02 <- magnoliopsida_records
 ```
 
-
 # 3) Filtrado de registros
 
 Se debe de filtrar por separado para cada taxon. Hay diferencias en el numero de columnas consideradas. Aquí se filtra la información que se va a usar. Los criterios mínimos son:
@@ -188,11 +187,11 @@ dim(magnoliopsida_records03)# 44708
 
 ## 3.1) Limpieza de errores en registros
 
-Hay varios paquetes para esto, ver las opciones mas amigables en cuanto a código (gator, coordinatecleaner, etc.)
+Hay varios paquetes para esto, ver las opciones mas amigables en cuanto a código (gator, coordinatecleaner, etc.). Aquí uso "CoordinateCleaner"
 
-En el siguiente "chunck" leemos la data retirada por Robert, seleccionamos los campos de interés (columnas), y removemos registros sin coordenadas.
+En el siguiente "chunk" leemos la data retirada por Robert, seleccionamos los campos de interés (columnas), y removemos registros sin coordenadas.
+
 ```{r}
-
 # revise the data
 dim(magnoliopsida_records03)
 
@@ -216,8 +215,8 @@ dim(magnoliopsida_records03)# none
 dim(dat)
 ```
 
+En el siguiente "chunk" hacemos un mapa de los registros en las regiones (la intensidad del color indica la cantidad de registros).
 
-En el siguiente "chunck" hacemos un mapa de los registros en las regiones (la intensidad del color indica la cantidad de registros).
 ```{r mapa}
 
 #plot data to get an overview
@@ -260,7 +259,6 @@ ggplot() +
 
 @robert aquí debe haber un falta de coincidencia entre los sistemas geográficos? Habría que ver, o revisar la extension y si corresponde a las regiones indicadas. Quizás si miras "str(df)", allí en la geometría puedes revisar si es cuestión de los límites o si es un problema de sistema de coordenadas geográficas.
 
-
 En el siguiente "chunk" cambiamos el código de uso de abreviaciones de países (para que coincidan con las del paquete CoordinateCleaner), y encontramos los problemas (básicos).
 
 ```{r}
@@ -280,12 +278,50 @@ flags <- clean_coordinates(x = dat,
                                     "equal", "zeros", "countries")) # most test are on by default
 ```
 
+Revisar el resultado:
 
+```{r}
+summary(flags)
+plot(flags, lon = "decimalLongitude", lat = "decimalLatitude")
+```
 
+Se pueden hacer muchas cosas más, como por ejemplo remover los registros con baja precisión
+
+```{r}
+
+#Remove records with low coordinate precision
+dat %>% 
+  mutate(Uncertainty = coordinateUncertaintyInMeters / 1000) %>% 
+  ggplot(aes(x = Uncertainty)) + 
+  geom_histogram() +
+  xlab("Coordinate uncertainty in meters") +
+  theme_bw()
+
+```
+
+```{r}
+
+dat_cl <- dat %>%
+  filter(coordinateUncertaintyInMeters / 1000 <= 100 | is.na(coordinateUncertaintyInMeters))
+
+# Remove unsuitable data sources, especially fossils 
+# which are responsible for the majority of problems in this case
+table(dat$basisOfRecord)
+
+## HUMAN_OBSERVATION    MATERIAL_SAMPLE PRESERVED_SPECIMEN 
+##              4979                  2                 19 
+
+dat_cl <- filter(dat_cl, basisOfRecord == "HUMAN_OBSERVATION" | 
+                         basisOfRecord == "OBSERVATION" |
+                         basisOfRecord == "PRESERVED_SPECIMEN")
+
+dim(dat)
+dim(dat_cl)# bajó el número de registros
+```
 
 ## 3.1) Ajuste taxonómico
 
-El "taxonomic scrubig" se puede hacer con los paquetes WFO y LCVP, y comparar el resultado.
+El "taxonomic scrubing" se puede hacer con los paquetes WFO y LCVP, y comparar el resultado.
 
 ```{r}
 
