@@ -23,15 +23,24 @@ Si se usa por pri
 ```{r}
 #| echo: false
 #library(tidyverse)  # manipulacion (incluye dlyr y ggplot2)
-#library(rgbif)      # busqueda registros
 #library(sf)         # manejo informacion geografica y espacial
-#library(rnaturalearth)
-#library(rnaturalearthdata)
-
+# we use a library for peru
+#[https://github.com/musajajorge/mapsPERU]
+# library(countrycode)# códigos de países
+# library(CoordinateCleaner)# este paquete nos permite limpiar los registros espaciamente
+# library(dplyr)# manipulación de datos
+# library(rgbif)# para extraer datos de rgif
+# library(sf)# manejos de datos vectoriales espaciales
+# library(rnaturalearth)# datos de mapas
+# library(rnaturalearthhires)# datos de mapas de alta resolución
+# library(remotes) #Descarga e instala paquetes R almacenados en 'GitHub', 'GitLab', 'Bitbucket', 'Bioconductor' o repositorios simples 'subversion' o 'git'.
+install_github("musajajorge/mapsPERU")# solo hacer la primera vez, luego comentar con un "#" antes de la oración
 
 # Packages names as a character vector
-packages <- c("tidyverse", "rgbif", "sf",
-          "rnaturalearth", "rnaturalearthdata")# vectors con los nombres de los paquetes
+packages <- c("tidyverse", "rgbif", "sf","remotes",
+          "rnaturalearth", "rnaturalearthdata",
+          "mapsPERU")# vectors con los nombres de los paquetes
+
 
 # Install packages not yet installed [for the first time]
 installed_packages <- packages %in% rownames(installed.packages())
@@ -139,6 +148,7 @@ magnoliopsida_records <- readRDS("./output/gbif_data/magnoliopsida_records.rds")
 magnoliopsida_records02 <- magnoliopsida_records
 ```
 
+
 # 3) Filtrado de registros
 
 Se debe de filtrar por separado para cada taxon. Hay diferencias en el numero de columnas consideradas. Aquí se filtra la información que se va a usar. Los criterios mínimos son:
@@ -168,6 +178,10 @@ magnoliopsida_records03 <-
   filter(basisOfRecord=="PRESERVED_SPECIMEN") %>% 
   filter(!is.na(decimalLatitude)) %>% 
   filter(!is.na(decimalLongitude))
+
+dim(magnoliopsida_records02$data)# 81003 registros
+dim(magnoliopsida_records03)# 44708
+
 ```
 
 # 3) Limpieza de registros
@@ -176,11 +190,98 @@ magnoliopsida_records03 <-
 
 Hay varios paquetes para esto, ver las opciones mas amigables en cuanto a código (gator, coordinatecleaner, etc.)
 
+En el siguiente "chunck" leemos la data retirada por Robert, seleccionamos los campos de interés (columnas), y removemos registros sin coordenadas.
 ```{r}
 
+# revise the data
+dim(magnoliopsida_records03)
+
+# select columns of interest
+dat <- magnoliopsida_records03 %>%
+  dplyr::select(species, decimalLongitude, 
+                decimalLatitude, countryCode,
+                individualCount,
+                gbifID, family, taxonRank,
+                coordinateUncertaintyInMeters,
+                year, basisOfRecord, institutionCode,
+                datasetName)
+
+# remove records without coordinates
+dat <- dat %>%
+  filter(!is.na(decimalLongitude)) %>%
+  filter(!is.na(decimalLatitude))
+
+# compare how many records:
+dim(magnoliopsida_records03)# none
+dim(dat)
+```
+
+
+En el siguiente "chunck" hacemos un mapa de los registros en las regiones (la intensidad del color indica la cantidad de registros).
+```{r mapa}
+
+#plot data to get an overview
+df <- map_REG# subset per regions
+df <- dplyr::filter(df, REGION=="Cajamarca" |
+                      REGION=="Amazonas")# filtering which regions
+
+# Example of the regions only:
+ggplot(df, aes(geometry=geometry)) +
+  geom_sf(aes(fill = REGION)) +
+  geom_text(data=df, 
+            aes(coords_x, 
+                coords_y, 
+                group=NULL,
+                label = ""), size=2.5) +
+  labs(x="", y="") + 
+  theme_classic()
+
+
+# Plotting regions + data
+ggplot() +
+  geom_sf(data = df,
+          aes(geometry=geometry,
+              fill = REGION))+
+  geom_point(data = dat,
+             aes(x = decimalLongitude, 
+                 y = decimalLatitude),
+             colour = "darkred",
+             size = 0.5,
+             alpha = 0.05) +
+  geom_text(data=df, 
+            aes(coords_x, 
+                coords_y, 
+                group=NULL,
+                label = ""), size=2.5) +
+  xlab("Longitude")+ylab("Latitude")
 
 
 ```
+
+@robert aquí debe haber un falta de coincidencia entre los sistemas geográficos? Habría que ver, o revisar la extension y si corresponde a las regiones indicadas. Quizás si miras "str(df)", allí en la geometría puedes revisar si es cuestión de los límites o si es un problema de sistema de coordenadas geográficas.
+
+
+En el siguiente "chunk" cambiamos el código de uso de abreviaciones de países (para que coincidan con las del paquete CoordinateCleaner), y encontramos los problemas (básicos).
+
+```{r}
+#convert country code from ISO2c to ISO3c
+dat$countryCode <-  countrycode(dat$countryCode, 
+                                origin =  'iso2c',
+                                destination = 'iso3c')
+
+#flag problems
+dat <- data.frame(dat)
+flags <- clean_coordinates(x = dat,
+                           lon = "decimalLongitude", 
+                           lat = "decimalLatitude",
+                           countries = "countryCode",
+                           species = "species",
+                           tests = c("capitals", "centroids",
+                                    "equal", "zeros", "countries")) # most test are on by default
+```
+
+
+
 
 ## 3.1) Ajuste taxonómico
 
