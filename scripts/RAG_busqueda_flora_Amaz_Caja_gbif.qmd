@@ -22,24 +22,26 @@ Si se usa por pri
 
 ```{r}
 #| echo: false
-#library(tidyverse)  # manipulacion (incluye dlyr y ggplot2)
-#library(sf)         # manejo informacion geografica y espacial
-# we use a library for peru
+library(tidyverse)  # manipulacion (incluye dlyr y ggplot2)
+library(sf)         # manejo informacion geografica y espacial
+#we use a library for peru
 #[https://github.com/musajajorge/mapsPERU]
-# library(countrycode)# códigos de países
-# library(CoordinateCleaner)# este paquete nos permite limpiar los registros espaciamente
-# library(dplyr)# manipulación de datos
-# library(rgbif)# para extraer datos de rgif
-# library(sf)# manejos de datos vectoriales espaciales
-# library(rnaturalearth)# datos de mapas
-# library(rnaturalearthhires)# datos de mapas de alta resolución
-# library(remotes) #Descarga e instala paquetes R almacenados en 'GitHub', 'GitLab', 'Bitbucket', 'Bioconductor' o repositorios simples 'subversion' o 'git'.
-install_github("musajajorge/mapsPERU")# solo hacer la primera vez, luego comentar con un "#" antes de la oración
+library(countrycode)# códigos de países
+library(CoordinateCleaner)# este paquete nos permite limpiar los registros espaciamente
+library(dplyr)# manipulación de datos
+library(rgbif)# para extraer datos de rgif
+library(sf)# manejos de datos vectoriales espaciales
+library(rnaturalearth)# datos de mapas
+library(rnaturalearthhires)# datos de mapas de alta resolución
+library(remotes) #Descarga e instala paquetes R almacenados en 'GitHub', 'GitLab', 'Bitbucket', 'Bioconductor' o repositorios simples 'subversion' o 'git'.
+devtools::install_github("musajajorge/mapsPERU")# solo hacer la primera vez, luego comentar con un "#" antes de la oración
 
 # Packages names as a character vector
-packages <- c("tidyverse", "rgbif", "sf","remotes",
-          "rnaturalearth", "rnaturalearthdata",
-          "mapsPERU")# vectors con los nombres de los paquetes
+packages <- c("tidyverse", "rgbif", 
+              "sf","remotes",
+              "rnaturalearth",
+              "rnaturalearthdata",
+              "mapsPERU")# vectors con los nombres de los paquetes
 
 
 # Install packages not yet installed [for the first time]
@@ -61,13 +63,16 @@ Adicionalmente, se crea un KML para visualizar en google earth.
 
 ```{r}
 polygon_wkt <- 
-  "POLYGON((-78.75 -3.95, -78.80 -4.50, -78.90 -5.00, 
-            -79.00 -5.50, -79.10 -6.00, -79.20 -6.50, 
-            -79.10 -7.00, 
-            -78.80 -7.50, -78.50 -8.00, -78.20 -7.90, 
-            -77.80 -7.50, -77.50 -7.00, -77.20 -6.50, 
-            -77.40 -6.00, -77.80 -5.50, -78.00 -5.00, 
-            -78.40 -4.40, -78.75 -3.95))"
+  "POLYGON((-78.75 -3.95, 
+  -78.80 -4.50, -78.90 -5.00,
+  -79.00 -5.50, -79.10 -6.00, 
+  -79.20 -6.50, -79.10 -7.00, 
+  -78.80 -7.50, -78.50 -8.00, 
+  -78.20 -7.90, -77.80 -7.50,
+  -77.50 -7.00, -77.20 -6.50, 
+  -77.40 -6.00, -77.80 -5.50, 
+  -78.00 -5.00, -78.40 -4.40, 
+-78.75 -3.95))"
 
 # crear objeto sf
 polygon_sf <- st_as_sfc(polygon_wkt, crs = 4326)
@@ -221,8 +226,13 @@ En el siguiente "chunk" hacemos un mapa de los registros en las regiones (la int
 
 #plot data to get an overview
 df <- map_REG# subset per regions
-df <- dplyr::filter(df, REGION=="Cajamarca" |
-                      REGION=="Amazonas")# filtering which regions
+
+str(df)
+unique(df$REGION)
+
+df <- dplyr::filter(df, REGION=="Cajamarca"|
+                      REGION=="Amazonas"|
+                      REGION=="Piura")# filtering which regions
 
 # Example of the regions only:
 ggplot(df, aes(geometry=geometry)) +
