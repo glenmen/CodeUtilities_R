@@ -32,7 +32,7 @@ library(dplyr)# manipulación de datos
 library(rgbif)# para extraer datos de rgif
 library(sf)# manejos de datos vectoriales espaciales
 library(rnaturalearth)# datos de mapas
-library(rnaturalearthhires)# datos de mapas de alta resolución
+#library(rnaturalearthhires)# datos de mapas de alta resolución
 library(remotes) #Descarga e instala paquetes R almacenados en 'GitHub', 'GitLab', 'Bitbucket', 'Bioconductor' o repositorios simples 'subversion' o 'git'.
 devtools::install_github("musajajorge/mapsPERU")# solo hacer la primera vez, luego comentar con un "#" antes de la oración
 
@@ -62,16 +62,13 @@ Se debe definir un poligono de referencia para la búsqueda. Se propone el sigui
 Adicionalmente, se crea un KML para visualizar en google earth.
 
 ```{r}
-polygon_wkt <- 
-  "POLYGON((-78.75 -3.95,-78.80 -4.50,-78.90 -5.00,-79.00 -5.50, -79.10 -6.00,-79.20 -6.50, -79.10 -7.00,-78.80 -7.50, -78.50 -8.00,-78.20 -7.90, -77.80 -7.50,-77.50 -7.00, -77.20 -6.50,-77.40 -6.00, -77.80 -5.50,-78.00 -5.00,-78.40 -4.40,-78.75 -3.95))"
-
 
 polygon_wkt <- 
-  "POLYGON((-77.50 -3.00,-78.80 -4.50,-79.90 -4.10,-79.90 -4.10, -79.90 -4.10,-79.90 -4.10, -79.10 -7.00,
--78.80 -7.60,-77.50 -7.90,-78.20 -7.90, -77.80 -7.50,-77.50 -6.00, -77.20 -6.10,-77.40 -6.00, -77.80 -3.00, -78.00 -3.00,-79.90 -4.10,-79.95 -3.00))"
+  "POLYGON((-77.5 -7.8, -79.5 -7.7, -80.0 -6.0,-80.0 -4.0, -79.0 -4.6,-78.4 -3.0, -77.5 -3.0, -77.0 -6.0,-77.4 -7.0))"
 
 # crear objeto sf
-polygon_sf <- st_as_sfc(polygon_wkt, crs = 4326)
+polygon_sf <- st_as_sfc(polygon_wkt, 
+                        crs = 4326)
 
 # grabar como KML
 #st_write(polygon_sf, "amazonas_cajamarca.kml", driver = "KML", append = FALSE)
@@ -90,26 +87,26 @@ Retirar las marcas de comentarios para realizar la busqueda (aprox 0.5 horas). [
 
 ```{r}
 
-# start_time <- Sys.time() 
- #liliopsida_records <- occ_data(
-  # taxonKey = 196,      # TaxonKey para Liliopsida (Monocots)
-   #geometry = polygon_wkt,  
-   #limit = 99999       # ajustar el limte de obtencion de registros
-#)
-# end_time <- Sys.time() 
+start_time <- Sys.time()
+ liliopsida_records <- occ_data(
+ taxonKey = 196,      # TaxonKey para Liliopsida (Monocots)
+   geometry = polygon_wkt,
+   limit = 99999       # ajustar el limte de obtencion de registros
+)
+end_time <- Sys.time()
 
-#diff_lilio_time <- difftime(end_time, start_time, units = "mins")
+diff_lilio_time <- difftime(end_time, start_time, units = "mins")
 
-#print(paste("Tiempo de Busqueda Liliopsida:", diff_lilio_time, "minutos", sep=" ")) #tiempo de busqueda de liliopsida
+print(paste("Tiempo de Busqueda Liliopsida:", diff_lilio_time, "minutos", sep=" ")) #tiempo de busqueda de liliopsida
 
-#saveRDS(liliopsida_records, "03_output/liliopsida_records.rds")
+saveRDS(liliopsida_records, "output/gbif_data/liliopsida_records.rds")
 
 ```
 
 Posterior al proceso de busqueda de liliopsida se graban en un archivo rds que reduce el tamaño.
 
 ```{r}
-liliopsida_records <- readRDS("./output/gbif_data/liliopsida_records.rds")# usar "../ [dos puntos, para imprimir/"rendering"]
+# liliopsida_records <- readRDS("./output/gbif_data/liliopsida_records.rds")# usar "../ [dos puntos, para imprimir/"rendering"]
 
 liliopsida_records02 <- liliopsida_records
 ```
@@ -122,21 +119,21 @@ Retirar las marcas de comentarios para realizar la busqueda (aprox 1.8 horas)
 
 ```{r}
 
-# start_time <- Sys.time() 
-#time01 <- Sys.time()
-#magnoliopsida_records <- occ_data(
- # taxonKey = 220,      # TaxonKey para Magnoliopsida (eudicots)
-#  geometry = polygon_wkt,  
- # limit = 99999       # Adjust the limit for more records
-#)
+ start_time <- Sys.time()
+time01 <- Sys.time()
+magnoliopsida_records <- occ_data(
+ taxonKey = 220,      # TaxonKey para Magnoliopsida (eudicots)
+  geometry = polygon_wkt,
+  limit = 99999       # Adjust the limit for more records
+)
 
-# end_time <- Sys.time() 
+end_time <- Sys.time()
 
-#diff_magno_time <- difftime(end_time, start_time, units = "mins")
+diff_magno_time <- difftime(end_time, start_time, units = "mins")
 
-#print(paste("Tiempo de Busqueda Magnoliopsida:", diff_magno_time, "minutos", sep=" ")) #tiempo de busqueda de liliopsida
+print(paste("Tiempo de Busqueda Magnoliopsida:", diff_magno_time, "minutos", sep=" ")) #tiempo de busqueda de liliopsida
 
-#saveRDS(magnoliopsida_records, "03_output/magnoliopsida_records.rds")
+saveRDS(magnoliopsida_records, "output/gbif_data/magnoliopsida_records.rds")
 
 
 ```
@@ -144,7 +141,7 @@ Retirar las marcas de comentarios para realizar la busqueda (aprox 1.8 horas)
 Posterior a la búsqueda se graba el objeto.
 
 ```{r}
-magnoliopsida_records <- readRDS("./output/gbif_data/magnoliopsida_records.rds")
+# magnoliopsida_records <- readRDS("./output/gbif_data/magnoliopsida_records.rds")
 
 magnoliopsida_records02 <- magnoliopsida_records
 ```
@@ -220,6 +217,13 @@ En el siguiente "chunk" hacemos un mapa de los registros en las regiones (la int
 
 ```{r mapa}
 
+# convertir polygono to a "dataframe" que se puede plotear como polígono:
+# ids <- factor(c("1.1"))
+# positions <- data.frame(
+#   id = rep(ids, each = 9),
+#   x = c(-77.50,-79.5, -80, -80, -79, -78.4, -77.5, -77,-77.4),
+# y = c(-7.8, -7.7, -6,-4, -4.6, -3, -3, -6,-7))
+
 #plot data to get an overview
 df <- map_REG# subset per regions
 
@@ -258,7 +262,10 @@ ggplot() +
                 coords_y, 
                 group=NULL,
                 label = ""), size=2.5) +
-  xlab("Longitude")+ylab("Latitude")
+  xlab("Longitude")+ylab("Latitude") #+
+  #geom_map(aes(map_id = positions$id), 
+  #         map = positions) +
+  #expand_limits(positions)
 
 
 ```
