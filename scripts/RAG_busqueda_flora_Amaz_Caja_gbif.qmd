@@ -21,7 +21,7 @@ Documentacion referencial de uso de informacion de gbif y `rgbif`
 Si se usa por pri
 
 ```{r}
-#| echo: false
+#
 library(tidyverse)  # manipulacion (incluye dlyr y ggplot2)
 library(sf)         # manejo informacion geografica y espacial
 #we use a library for peru
@@ -63,16 +63,12 @@ Adicionalmente, se crea un KML para visualizar en google earth.
 
 ```{r}
 polygon_wkt <- 
-  "POLYGON((-78.75 -3.95, 
-  -78.80 -4.50, -78.90 -5.00,
-  -79.00 -5.50, -79.10 -6.00, 
-  -79.20 -6.50, -79.10 -7.00, 
-  -78.80 -7.50, -78.50 -8.00, 
-  -78.20 -7.90, -77.80 -7.50,
-  -77.50 -7.00, -77.20 -6.50, 
-  -77.40 -6.00, -77.80 -5.50, 
-  -78.00 -5.00, -78.40 -4.40, 
--78.75 -3.95))"
+  "POLYGON((-78.75 -3.95,-78.80 -4.50,-78.90 -5.00,-79.00 -5.50, -79.10 -6.00,-79.20 -6.50, -79.10 -7.00,-78.80 -7.50, -78.50 -8.00,-78.20 -7.90, -77.80 -7.50,-77.50 -7.00, -77.20 -6.50,-77.40 -6.00, -77.80 -5.50,-78.00 -5.00,-78.40 -4.40,-78.75 -3.95))"
+
+
+polygon_wkt <- 
+  "POLYGON((-77.50 -3.00,-78.80 -4.50,-79.90 -4.10,-79.90 -4.10, -79.90 -4.10,-79.90 -4.10, -79.10 -7.00,
+-78.80 -7.60,-77.50 -7.90,-78.20 -7.90, -77.80 -7.50,-77.50 -6.00, -77.20 -6.10,-77.40 -6.00, -77.80 -3.00, -78.00 -3.00,-79.90 -4.10,-79.95 -3.00))"
 
 # crear objeto sf
 polygon_sf <- st_as_sfc(polygon_wkt, crs = 4326)
@@ -93,7 +89,7 @@ La estrategia usada comprende bscar registros de plantas de grupos Liliopsida y 
 Retirar las marcas de comentarios para realizar la busqueda (aprox 0.5 horas). [@robert Incluir la fecha de la búsqueda, esto es importante porque los repositorios cambian y esto se tiene que añadir en la metodología.]
 
 ```{r}
-#| echo: false
+
 # start_time <- Sys.time() 
  #liliopsida_records <- occ_data(
   # taxonKey = 196,      # TaxonKey para Liliopsida (Monocots)
@@ -125,7 +121,7 @@ liliopsida_records02 <- liliopsida_records
 Retirar las marcas de comentarios para realizar la busqueda (aprox 1.8 horas)
 
 ```{r}
-#| echo: false
+
 # start_time <- Sys.time() 
 #time01 <- Sys.time()
 #magnoliopsida_records <- occ_data(
