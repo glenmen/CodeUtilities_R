@@ -64,7 +64,16 @@ Adicionalmente, se crea un KML para visualizar en google earth.
 ```{r}
 
 polygon_wkt <- 
-  "POLYGON((-77.5 -7.8, -79.5 -7.7, -80.0 -6.0,-80.0 -4.0, -79.0 -4.6,-78.4 -3.0, -77.5 -3.0, -77.0 -6.0,-77.4 -7.0))"
+ "POLYGON((
+-77.5 -7.8,
+-77.0 -6.0,
+-77.5 -3.0,
+-78.4 -3.0,
+-79.0 -4.6,
+-80.0 -4.0,
+-80.0 -6.0,
+-79.5 -7.7,
+-77.5 -7.8))"
 
 # crear objeto sf
 polygon_sf <- st_as_sfc(polygon_wkt, 
@@ -133,7 +142,7 @@ diff_magno_time <- difftime(end_time, start_time, units = "mins")
 
 print(paste("Tiempo de Busqueda Magnoliopsida:", diff_magno_time, "minutos", sep=" ")) #tiempo de busqueda de liliopsida
 
-saveRDS(magnoliopsida_records, "output/gbif_data/magnoliopsida_records.rds")
+saveRDS(magnoliopsida_records, "output/gbif_data/magnoliopsida_records2.rds")
 
 
 ```
