@@ -99,8 +99,8 @@ Retirar las marcas de comentarios para realizar la busqueda (aprox 0.5 horas). [
 start_time <- Sys.time()
  liliopsida_records <- occ_data(
  taxonKey = 196,      # TaxonKey para Liliopsida (Monocots)
-   geometry = polygon_wkt,
-   limit = 99999       # ajustar el limte de obtencion de registros
+   geometry = polygon_wkt
+  # limit = 99999       # ajustar el limte de obtencion de registros
 )
 end_time <- Sys.time()
 
@@ -132,8 +132,8 @@ Retirar las marcas de comentarios para realizar la busqueda (aprox 1.8 horas)
 time01 <- Sys.time()
 magnoliopsida_records <- occ_data(
  taxonKey = 220,      # TaxonKey para Magnoliopsida (eudicots)
-  geometry = polygon_wkt,
-  limit = 99999       # Adjust the limit for more records
+  geometry = polygon_wkt
+  #limit = 99999       # Adjust the limit for more records
 )
 
 end_time <- Sys.time()
